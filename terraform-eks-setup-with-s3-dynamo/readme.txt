@@ -1,3 +1,6 @@
+All the separate .tf files will be combined into an single file with their dependency order during terraform init. on their own .
+
+
 resource "aws_s3_bucket" "terraform_state" {
   bucket = "my-eks-terraform-state-bucket9080"
   acl    = "private"
