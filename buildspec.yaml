@@ -3,34 +3,43 @@ version: 0.2
 env:
   variables:
     AWS_DEFAULT_REGION: "us-east-2"
-    IMAGE_REPO_NAME: "nginx"
-    AWS_ACCOUNT_ID: "754450290666"
+    IMAGE_REPO_NAME_1: "karthickapp"
+    IMAGE_REPO_NAME_2: "nginx"
+    IMAGE_TAG: "latest"
 
 phases:
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
-      - export REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME
+      - aws --version
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin 754450290666.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - export REPOSITORY_URI_1=754450290666.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME_1
+      - export REPOSITORY_URI_2=754450290666.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME_2
       - export COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - export IMAGE_TAG=${COMMIT_HASH:-latest}
-      - echo "Repository URI: $REPOSITORY_URI"
+      - echo "Repository URI 1: $REPOSITORY_URI_1"
+      - echo "Repository URI 2: $REPOSITORY_URI_2"
       - echo "Image Tag: $IMAGE_TAG"
 
   build:
     commands:
       - echo Build started on `date`
-      - cd NGINX
-      - docker build -t $REPOSITORY_URI:$IMAGE_TAG .
-      - cd ..
+      - echo "Building the Docker image for JAVA..."
+      - cd JAVA
+      - docker build -t $REPOSITORY_URI_1:$IMAGE_TAG .
+      - cd ../NGINX
+      - echo "Building the Docker image for NGINX..."
+      - docker build -t $REPOSITORY_URI_2:$IMAGE_TAG .
 
   post_build:
     commands:
       - echo Build completed on `date`
-      - echo Pushing Docker image...
-      - docker push $REPOSITORY_URI:$IMAGE_TAG
-      - echo Writing image definitions...
-      - printf '[{"name":"nginx-container","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+      - echo "Pushing Docker images to ECR..."
+      - docker push $REPOSITORY_URI_1:$IMAGE_TAG
+      - docker push $REPOSITORY_URI_2:$IMAGE_TAG
+      - echo "Writing image definitions file for downstream deployments..."
+      - printf '[{"name":"java-container","imageUri":"%s"},{"name":"nginx-container","imageUri":"%s"}]' $REPOSITORY_URI_1:$IMAGE_TAG $REPOSITORY_URI_2:$IMAGE_TAG > imagedefinitions.json
 
 artifacts:
-  files: imagedefinitions.json
+  files:
+    - imagedefinitions.json
