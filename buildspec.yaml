@@ -38,8 +38,8 @@ phases:
       - docker push $REPOSITORY_URI_1:$IMAGE_TAG
       - docker push $REPOSITORY_URI_2:$IMAGE_TAG
       - echo "Writing image definitions file for downstream deployments..."
-      - printf '[{"name":"java-container","imageUri":"%s"},{"name":"nginx-container","imageUri":"%s"}]' \
-          $REPOSITORY_URI_1:$IMAGE_TAG $REPOSITORY_URI_2:$IMAGE_TAG > imagedefinitions.json
+      - printf '[{"name":"java-container","imageUri":"%s"},{"name":"nginx-container","imageUri":"%s"}]' $REPOSITORY_URI_1:$IMAGE_TAG $REPOSITORY_URI_2:$IMAGE_TAG > imagedefinitions.json
 
 artifacts:
-  files: imagedefinitions.json
+  files:
+    - imagedefinitions.json
