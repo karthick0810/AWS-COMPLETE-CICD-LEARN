@@ -1,0 +1,50 @@
+ ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.angular.name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.angular.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.angular.name }}
+      annotations:
+        rollme: "{{ now | unixEpoch }}"
+    spec:
+      containers:
+        - name: {{ .Values.angular.name }}
+          image: {{ .Values.angular.image.repository }}:{{ .Values.angular.image.tag }}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: {{ .Values.angular.containerPort }}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.java.name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.java.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.java.name }}
+      annotations:
+        rollme: "{{ now | unixEpoch }}"
+    spec:
+      containers:
+        - name: {{ .Values.java.name }}
+          image: {{ .Values.java.image.repository }}:{{ .Values.java.image.tag }}
+          imagePullPolicy: Always
+          ports:
+            {{- range .Values.java.ports }}
+            - name: {{ .name }}
+              containerPort: {{ .containerPort }}
+            {{- end }}
