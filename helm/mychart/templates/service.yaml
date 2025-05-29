@@ -10,7 +10,7 @@ spec:
     - port: {{ .Values.angular.servicePort }}
       targetPort: {{ .Values.angular.containerPort }}
       protocol: TCP
-  type: LoadBalancer
+  type: ClusterIP  
 
 ---
 apiVersion: v1
@@ -20,7 +20,7 @@ metadata:
 spec:
   selector:
     app: {{ .Values.java.name }}
-  type: LoadBalancer
+  type: ClusterIP  
   ports:
     {{- range .Values.java.ports }}
     - name: {{ .name }}
