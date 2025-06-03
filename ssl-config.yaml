@@ -1,0 +1,5 @@
+controller:
+  progressDeadlineSeconds: 600
+  config:
+    ssl-protocols: "TLSv1.2 TLSv1.3"
+
